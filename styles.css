@@ -37,6 +37,17 @@ h1 {
   transition: width 0.4s;
 }
 
+#sentence {
+  font-size: 22px;
+  font-weight: 500;
+  margin-bottom: 15px;
+}
+
+.blank {
+  border-bottom: 3px solid #333;
+  padding: 0 10px;
+}
+
 #sentence-box {
   text-align: center;
   margin: 20px 0;
