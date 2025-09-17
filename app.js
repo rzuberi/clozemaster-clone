@@ -15,7 +15,8 @@ function updateProgress() {
 
 function showSentence() {
   let data = sentences[idx];
-  document.getElementById("sentence").innerText = data.sentence;
+  let display = data.sentence.replace("___", "<span class='blank'>___</span>");
+  document.getElementById("sentence").innerHTML = display;
   document.getElementById("answer").value = "";
   document.getElementById("feedback").innerHTML = "";
   document.getElementById("answer").focus();
