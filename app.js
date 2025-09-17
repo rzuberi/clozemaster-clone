@@ -477,68 +477,100 @@
       if (e.target.id === "shortcutsModal") closeShortcuts();
     });
 
-    // Keyboard
-    document.addEventListener("keydown", (e) => {
-      const modalOpen = !el("shortcutsModal").hidden;
-      if (modalOpen && (e.key === "Escape" || e.key === "Esc")) { closeShortcuts(); return; }
+    // --- Keyboard (fixed: don't trigger G/N/etc while typing) ---
+function isTypingTarget(t) {
+  if (!t) return false;
+  if (t.isContentEditable) return true;
+  if (t.tagName === "TEXTAREA") return true;
+  if (t.tagName === "INPUT") {
+    const type = (t.getAttribute("type") || "text").toLowerCase();
+    // treat most inputs (except buttons, checkboxes, etc.) as typing fields
+    return !["button","submit","checkbox","radio","range","color","file","image","reset","hidden"].includes(type)
+           && !t.readOnly && !t.disabled;
+  }
+  return false;
+}
 
-      // "?" opens modal (Shift+/ on many keyboards)
-      if (e.key === "?" || (e.shiftKey && e.key === "/")) { e.preventDefault(); openShortcuts(); return; }
+document.addEventListener("keydown", (e) => {
+  const modalOpen = !el("shortcutsModal").hidden || !el("settingsModal").hidden || !el("importModal").hidden;
+  if (modalOpen) {
+    if (e.key === "Escape" || e.key === "Esc") {
+      // close the topmost modal
+      if (!el("shortcutsModal").hidden) el("shortcutsModal").hidden = true;
+      else if (!el("settingsModal").hidden) el("settingsModal").hidden = true;
+      else if (!el("importModal").hidden) el("importModal").hidden = true;
+    }
+    return;
+  }
 
-      // Focus answer
-      if (e.key === "/") { e.preventDefault(); const a=el("answer"); if(!a.hidden){ a.focus(); a.select(); } return; }
+  const typing = isTypingTarget(e.target);
+  const mode = state.settings.mode;
 
-      // When modal open, don't process other shortcuts
-      if (modalOpen) return;
+  // "?" opens shortcuts (Shift + / on many layouts). Allow even while typing.
+  if (e.key === "?" || (e.shiftKey && e.key === "/")) { e.preventDefault(); openShortcuts(); return; }
 
-      const mode = state.settings.mode;
+  // When the cursor is **in a text field**, only handle Enter & Shift+Enter.
+  if (typing) {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      if (waitingForNext) { waitingForNext = false; nextItem(); }
+      else checkAnswer();
+    } else if (e.key === "Enter" && e.shiftKey) {
+      e.preventDefault();
+      nextItem();
+    }
+    // ignore all other shortcuts while typing (so "g" can be typed)
+    return;
+  }
 
-      // Enter: submit / next if already correct
-      if (e.key === "Enter" && !e.shiftKey) {
-        e.preventDefault();
-        if (waitingForNext) { waitingForNext = false; nextItem(); }
-        else if (mode === "mc") {
-          // if MC, activate focused choice
-          chooseChoice(mcFocusIdx);
-        } else {
-          checkAnswer();
-        }
-        return;
-      }
+  // "/" focuses the input (only when not already typing)
+  if (e.key === "/") { e.preventDefault(); const a=el("answer"); if(!a.hidden){ a.focus(); a.select(); } return; }
 
-      // Shift+Enter: skip
-      if (e.key === "Enter" && e.shiftKey) { e.preventDefault(); nextItem(); return; }
+  // Enter outside inputs
+  if (e.key === "Enter" && !e.shiftKey) {
+    e.preventDefault();
+    if (waitingForNext) { waitingForNext = false; nextItem(); }
+    else if (mode === "mc") { chooseChoice(mcFocusIdx); }
+    else { checkAnswer(); }
+    return;
+  }
 
-      // R: repeat
-      if (e.key.toLowerCase() === "r") { e.preventDefault(); repeatItem(); return; }
+  // Shift+Enter: skip
+  if (e.key === "Enter" && e.shiftKey) { e.preventDefault(); nextItem(); return; }
 
-      // G or N: next
-      if (e.key.toLowerCase() === "g" || e.key.toLowerCase() === "n") { e.preventDefault(); nextItem(); return; }
+  // R: repeat
+  if (e.key.toLowerCase() === "r") { e.preventDefault(); repeatItem(); return; }
 
-      // H: hint
-      if (e.key.toLowerCase() === "h") { e.preventDefault(); showHint(); return; }
+  // G or N: next
+  if (e.key.toLowerCase() === "g" || e.key.toLowerCase() === "n") { e.preventDefault(); nextItem(); return; }
 
-      // M: toggle mode
-      if (e.key.toLowerCase() === "m") { e.preventDefault(); toggleMode(); return; }
+  // H: hint
+  if (e.key.toLowerCase() === "h") { e.preventDefault(); showHint(); return; }
 
-      // 1-4 select in MC
-      if (mode === "mc" && ["1","2","3","4"].includes(e.key)) {
-        e.preventDefault();
-        const i = parseInt(e.key, 10) - 1;
-        chooseChoice(i);
-        return;
-      }
+  // M: toggle mode
+  if (e.key.toLowerCase() === "m") { e.preventDefault(); toggleMode(); return; }
 
-      // Up/Down cycle MC focus
-      if (mode === "mc" && (e.key === "ArrowUp" || e.key === "ArrowDown")) {
-        e.preventDefault();
-        const count = currentChoices.length;
-        if (!count) return;
-        mcFocusIdx = (mcFocusIdx + (e.key === "ArrowDown" ? 1 : -1) + count) % count;
-        focusChoice(mcFocusIdx);
-        return;
-      }
-    });
+  // D / U: export / import
+  if (e.key.toLowerCase() === "d") { e.preventDefault(); exportProgress(); return; }
+  if (e.key.toLowerCase() === "u") { e.preventDefault(); el("importFile").click(); return; }
+
+  // 1–4 pick MC options (only when not typing and in MC mode)
+  if (mode === "mc" && ["1","2","3","4"].includes(e.key)) {
+    e.preventDefault();
+    chooseChoice(parseInt(e.key, 10) - 1);
+    return;
+  }
+
+  // Up/Down: cycle MC focus
+  if (mode === "mc" && (e.key === "ArrowUp" || e.key === "ArrowDown")) {
+    e.preventDefault();
+    const count = currentChoices.length;
+    if (!count) return;
+    mcFocusIdx = (mcFocusIdx + (e.key === "ArrowDown" ? 1 : -1) + count) % count;
+    focusChoice(mcFocusIdx);
+    return;
+  }
+});
 
     // Save on unload
     window.addEventListener("beforeunload", saveState);
