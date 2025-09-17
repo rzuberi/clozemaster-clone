@@ -1,31 +1,47 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>Spanish Cloze Trainer</title>
-  <link rel="stylesheet" href="styles.css">
-</head>
-<body>
-  <div id="app">
-    <h1>Spanish Trainer</h1>
+:root {
+  --bg: #f7f9fc;
+  --fg: #222;
+  --accent: #4CAF50;
+}
 
-    <div id="progress-bar"><div id="progress-fill"></div></div>
+body {
+  font-family: system-ui, sans-serif;
+  background: var(--bg);
+  color: var(--fg);
+  display: flex;
+  justify-content: center;
+  margin: 0;
+}
 
-    <div id="sentence-box">
-      <p id="sentence"></p>
-      <input id="answer" type="text" placeholder="Type your answer..." autofocus />
-      <div id="choices"></div>
-      <div id="feedback"></div>
-    </div>
+header, footer {
+  display: flex;
+  justify-content: space-between;
+  padding: 1rem;
+}
 
-    <div id="controls">
-      <button onclick="showHint()">💡 Hint</button>
-      <button onclick="toggleChoices()">🔀 Multiple Choice</button>
-    </div>
+#card {
+  background: white;
+  padding: 2rem;
+  margin: 2rem 0;
+  border-radius: 12px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+  text-align: center;
+  max-width: 600px;
+}
 
-    <div id="stats"></div>
-  </div>
+#sentence { font-size: 1.5rem; margin-bottom: 1rem; }
 
-  <script src="app.js"></script>
-</body>
-</html>
+.blank {
+  border-bottom: 3px solid #444;
+  padding: 0 0.5rem;
+  font-weight: bold;
+}
+
+button {
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  background: #eee;
+  cursor: pointer;
+}
+button:hover { background: #ddd; }
