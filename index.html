@@ -1,12 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Spanish Cloze Trainer</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
 <body>
-  <h1>Clozemaster Clone</h1>
-  <div id="stats"></div>
-  <div id="quiz"></div>
+  <div id="app">
+    <h1>Spanish Trainer</h1>
 
-  <div style="margin-top:20px;">
-    <button onclick="exportProgress()">Download Progress</button>
-    <input type="file" onchange="importProgress(event)" />
+    <div id="progress-bar"><div id="progress-fill"></div></div>
+
+    <div id="sentence-box">
+      <p id="sentence"></p>
+      <input id="answer" type="text" placeholder="Type your answer..." autofocus />
+      <div id="choices"></div>
+      <div id="feedback"></div>
+    </div>
+
+    <div id="controls">
+      <button onclick="showHint()">💡 Hint</button>
+      <button onclick="toggleChoices()">🔀 Multiple Choice</button>
+    </div>
+
+    <div id="stats"></div>
   </div>
 
   <script src="app.js"></script>
 </body>
+</html>
