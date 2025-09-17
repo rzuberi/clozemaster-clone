@@ -1,32 +1,168 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>Spanish Cloze Trainer</title>
-  <link rel="stylesheet" href="styles.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-  <header>
-    <h1>Spanish Trainer</h1>
-    <button id="help">?</button>
-    <button id="settings">⚙️</button>
+  <header class="app-header" role="banner">
+    <div class="brand">
+      <span class="logo" aria-hidden="true">🟩</span>
+      <h1>Spanish Trainer</h1>
+      <span class="version" id="appVersion" aria-label="App version"></span>
+    </div>
+    <div class="header-controls">
+      <div class="header-stats" aria-label="Streak">
+        <div class="streak">
+          <span>🔥</span>
+          <strong id="streakCurrent">0</strong>
+          <span class="sep">/ best</span>
+          <strong id="streakBest">0</strong>
+        </div>
+      </div>
+      <button id="helpBtn" class="icon-btn" aria-haspopup="dialog" title="Shortcuts (?)">?</button>
+      <button id="settingsBtn" class="icon-btn" aria-haspopup="dialog" title="Settings">⚙️</button>
+    </div>
   </header>
 
-  <main id="card">
-    <p id="sentence"></p>
-    <input id="answer" type="text" placeholder="Type your answer…" autofocus>
-    <div id="choices"></div>
-    <div id="feedback" aria-live="polite"></div>
+  <main class="card" id="card" role="main">
+    <p id="sentence" class="sentence" aria-live="polite"></p>
+
+    <div id="modeToggleRow" class="mode-row" role="group" aria-label="Answer mode">
+      <button id="modeInputBtn" class="chip chip--on" type="button" aria-pressed="true">Type</button>
+      <button id="modeMcBtn" class="chip" type="button" aria-pressed="false">Multiple Choice</button>
+    </div>
+
+    <input id="answer" class="answer-input" type="text" placeholder="Type your answer… (Enter)" autocomplete="off" />
+    <div id="choices" class="choices" hidden></div>
+    <div id="feedback" class="feedback" aria-live="polite"></div>
+
+    <div class="actions">
+      <button id="hintBtn" class="btn" type="button" title="Hint (H)">💡 Hint</button>
+      <button id="submitBtn" class="btn primary" type="button" title="Submit (Enter)">Submit</button>
+      <button id="skipBtn" class="btn" type="button" title="Skip (Shift+Enter)">Skip</button>
+      <button id="repeatBtn" class="btn" type="button" title="Repeat (R)">Repeat</button>
+      <button id="nextBtn" class="btn" type="button" title="Next (G/N)">Next</button>
+      <button id="exportBtn" class="btn" type="button" title="Export (D)">⬇ Export</button>
+      <button id="importBtn" class="btn" type="button" title="Import (U)">⬆ Import</button>
+      <input id="importFile" type="file" accept="application/json" hidden />
+    </div>
   </main>
 
-  <footer>
-    <div id="progress-ring"></div>
-    <div id="heatmap"></div>
-    <button id="export">Export</button>
-    <button id="import">Import</button>
+  <footer class="footer" role="contentinfo">
+    <section class="goal-ring" aria-label="Daily Goal Progress">
+      <div class="ring-wrap">
+        <svg id="goalRing" class="ring" width="96" height="96" viewBox="0 0 100 100">
+          <circle class="ring-bg" cx="50" cy="50" r="45" />
+          <circle class="ring-fg" id="ringFg" cx="50" cy="50" r="45" />
+        </svg>
+        <div class="ring-center">
+          <div id="ringText" class="ring-text">0/20</div>
+          <div class="ring-sub">today</div>
+        </div>
+      </div>
+      <div class="today-stats">
+        <div><strong id="todayCorrect">0</strong> correct</div>
+        <div><span id="todayWrong">0</span> wrong</div>
+      </div>
+    </section>
+
+    <section class="session">
+      <div class="session-row">
+        <span class="label">Session</span>
+        <span class="value"><strong id="sessionCorrect">0</strong> / <span id="dailyGoalText">20</span></span>
+      </div>
+      <div id="sessionBar" class="session-bar"><div id="sessionFill" class="session-fill"></div></div>
+    </section>
+
+    <section class="heatmap">
+      <div class="heatmap-head">
+        <div class="hm-title">Last 90 days</div>
+        <div class="hm-stats">
+          <span>Today: <strong id="hmToday">0</strong></span>
+          <span>7-day: <strong id="hm7d">0</strong></span>
+          <span>30-day: <strong id="hm30d">0</strong></span>
+        </div>
+      </div>
+      <div id="heatGrid" class="heat-grid"></div>
+    </section>
   </footer>
 
-  <div id="toasts"></div>
+  <!-- Shortcuts modal -->
+  <div id="shortcutsModal" class="modal" hidden>
+    <div class="modal-content">
+      <div class="modal-head">
+        <h2>Keyboard Shortcuts</h2>
+        <button id="closeShortcuts" class="icon-btn">✕</button>
+      </div>
+      <div class="modal-body">
+        <ul class="shortcut-list">
+          <li><kbd>Enter</kbd> Submit / Next</li>
+          <li><kbd>Shift</kbd>+<kbd>Enter</kbd> Skip</li>
+          <li><kbd>R</kbd> Repeat</li>
+          <li><kbd>G/N</kbd> Next</li>
+          <li><kbd>M</kbd> Toggle Mode</li>
+          <li><kbd>H</kbd> Hint</li>
+          <li><kbd>1-4</kbd> MC options</li>
+          <li><kbd>↑/↓</kbd> Cycle MC focus</li>
+          <li><kbd>/</kbd> Focus input</li>
+          <li><kbd>D</kbd> Export</li>
+          <li><kbd>U</kbd> Import</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- Settings modal -->
+  <div id="settingsModal" class="modal" hidden>
+    <div class="modal-content">
+      <div class="modal-head">
+        <h2>Settings</h2>
+        <button id="closeSettings" class="icon-btn">✕</button>
+      </div>
+      <div class="modal-body">
+        <label>Daily Goal:
+          <input id="goalInput" type="number" min="1" max="200" />
+        </label>
+        <label>Theme:
+          <select id="themeSelect">
+            <option value="auto">Auto</option>
+            <option value="light">Light</option>
+            <option value="dark">Dark</option>
+          </select>
+        </label>
+        <label><input id="ttsToggle" type="checkbox" /> Enable TTS</label>
+        <button id="resetBtn" class="btn danger">Reset Progress</button>
+      </div>
+      <div class="modal-foot">
+        <button id="saveSettings" class="btn primary">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Import preview modal -->
+  <div id="importModal" class="modal" hidden>
+    <div class="modal-content">
+      <div class="modal-head">
+        <h2>Import Progress</h2>
+        <button id="closeImport" class="icon-btn">✕</button>
+      </div>
+      <div class="modal-body">
+        <div id="importPreview"></div>
+        <label><input type="radio" name="importMode" value="merge" checked /> Merge</label>
+        <label><input type="radio" name="importMode" value="replace" /> Replace</label>
+      </div>
+      <div class="modal-foot">
+        <button id="applyImport" class="btn primary">Apply</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toasts -->
+  <div id="toasts" class="toasts"></div>
+
   <script src="app.js"></script>
 </body>
 </html>
