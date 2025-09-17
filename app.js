@@ -69,8 +69,8 @@ function submit(answer) {
     progress.streaks[idx] = 0; // reset if wrong
   }
 
-  // mark as mastered if streak >= 3
-  if (progress.streaks[idx] >= 3 && !progress.mastered.includes(idx)) {
+  // mark as mastered if streak >= 10
+  if (progress.streaks[idx] >= 10 && !progress.mastered.includes(idx)) {
     progress.mastered.push(idx);
   }
 
