@@ -59,12 +59,29 @@ function submit(answer) {
 
   alert(correct ? "✅ Correct!" : "❌ Wrong");
 
-  progress.history.push({sentence_id: idx, correct, timestamp: new Date().toISOString()});
-  
-  if (correct && !progress.mastered.includes(idx)) {
+  // ensure streaks object exists
+  if (!progress.streaks) progress.streaks = {};
+
+  // update streak
+  if (correct) {
+    progress.streaks[idx] = (progress.streaks[idx] || 0) + 1;
+  } else {
+    progress.streaks[idx] = 0; // reset if wrong
+  }
+
+  // mark as mastered if streak >= 3
+  if (progress.streaks[idx] >= 3 && !progress.mastered.includes(idx)) {
     progress.mastered.push(idx);
   }
 
+  // log history
+  progress.history.push({
+    sentence_id: idx,
+    correct,
+    timestamp: new Date().toISOString()
+  });
+
+  // move to next
   progress.current_index = (idx + 1) % sentences.length;
   saveProgress(progress);
 
