@@ -1,127 +1,95 @@
 let idx = 0;
 let sentences = [];
-let user = "me";
+let showChoices = false;
+let waitingForNext = false;
 
 async function loadSentences() {
   let res = await fetch("sentences.json");
   sentences = await res.json();
 }
 
-function getProgress() {
-  return JSON.parse(localStorage.getItem("progress") || 
-    JSON.stringify({user, current_index: 0, history: [], mastered: []}));
+function updateProgress() {
+  let percent = ((idx+1) / sentences.length) * 100;
+  document.getElementById("progress-fill").style.width = percent + "%";
 }
 
-function saveProgress(progress) {
-  localStorage.setItem("progress", JSON.stringify(progress));
-}
-
-function calcStats(progress) {
-  let data = progress.history;
-  let now = new Date();
-  let todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-  let weekStart = new Date(todayStart.getTime() - 7*24*60*60*1000);
-
-  let total = data.length;
-  let today = data.filter(r => new Date(r.timestamp) >= todayStart).length;
-  let week = data.filter(r => new Date(r.timestamp) >= weekStart).length;
-
-  let first = data.length > 0 ? new Date(data[0].timestamp) : now;
-  let days = Math.max(1, Math.floor((now - first)/(1000*60*60*24)));
-  let avg = (total/days).toFixed(2);
-
-  return { total, today, week, average_per_day: avg };
-}
-
-function showStats(progress) {
-  let s = calcStats(progress);
-  document.getElementById("stats").innerHTML =
-    `<p><b>Progress</b></p>
-     <p>Trained today: ${s.today}</p>
-     <p>This week: ${s.week}</p>
-     <p>Average per day: ${s.average_per_day}</p>
-     <p>Total answered: ${s.total}</p>
-     <p>Mastered: ${progress.mastered.length}</p>`;
-}
-
-function showSentence(progress) {
-  idx = progress.current_index % sentences.length;
+function showSentence() {
   let data = sentences[idx];
-  document.getElementById("quiz").innerHTML =
-    `<p>${data.sentence}</p>` +
-    data.options.map(o => `<button onclick="submit('${o}')">${o}</button>`).join(" ");
+  document.getElementById("sentence").innerText = data.sentence;
+  document.getElementById("answer").value = "";
+  document.getElementById("feedback").innerHTML = "";
+  document.getElementById("answer").focus();
+
+  // choices
+  let choicesDiv = document.getElementById("choices");
+  choicesDiv.innerHTML = "";
+  if (showChoices) {
+    data.options.forEach(opt => {
+      let b = document.createElement("button");
+      b.innerText = opt;
+      b.onclick = () => checkAnswer(opt);
+      choicesDiv.appendChild(b);
+    });
+  }
+  updateProgress();
 }
 
-function submit(answer) {
-  let progress = getProgress();
+function checkAnswer(inputVal) {
   let data = sentences[idx];
-  let correct = data.answer === answer;
+  let answer = inputVal || document.getElementById("answer").value.trim();
+  let feedbackDiv = document.getElementById("feedback");
+  feedbackDiv.innerHTML = "";
 
-  alert(correct ? "✅ Correct!" : "❌ Wrong");
-
-  // ensure streaks object exists
-  if (!progress.streaks) progress.streaks = {};
-
-  // update streak
-  if (correct) {
-    progress.streaks[idx] = (progress.streaks[idx] || 0) + 1;
+  if (answer.toLowerCase() === data.answer.toLowerCase()) {
+    feedbackDiv.innerHTML = "✅ Correct!";
+    waitingForNext = true;
   } else {
-    progress.streaks[idx] = 0; // reset if wrong
-  }
-
-  // mark as mastered if streak >= 10
-  if (progress.streaks[idx] >= 10 && !progress.mastered.includes(idx)) {
-    progress.mastered.push(idx);
-  }
-
-  // log history
-  progress.history.push({
-    sentence_id: idx,
-    correct,
-    timestamp: new Date().toISOString()
-  });
-
-  // move to next
-  progress.current_index = (idx + 1) % sentences.length;
-  saveProgress(progress);
-
-  showStats(progress);
-  showSentence(progress);
-}
-
-// Export progress as JSON file
-function exportProgress() {
-  let progress = getProgress();
-  let blob = new Blob([JSON.stringify(progress, null, 2)], {type: "application/json"});
-  let url = URL.createObjectURL(blob);
-  let a = document.createElement("a");
-  a.href = url;
-  a.download = "progress.json";
-  a.click();
-}
-
-// Import progress from JSON file
-function importProgress(event) {
-  let file = event.target.files[0];
-  if (!file) return;
-  let reader = new FileReader();
-  reader.onload = e => {
-    try {
-      let data = JSON.parse(e.target.result);
-      saveProgress(data);
-      showStats(data);
-      showSentence(data);
-      alert("✅ Progress imported!");
-    } catch (err) {
-      alert("❌ Invalid file");
+    // show letter-by-letter
+    let html = "";
+    let correctWord = data.answer;
+    for (let i=0; i<Math.max(answer.length, correctWord.length); i++) {
+      let a = answer[i] || "";
+      let c = correctWord[i] || "";
+      if (a === c) {
+        html += `<span class="correct">${c}</span>`;
+      } else {
+        html += `<span class="wrong">${a || "_"}</span>`;
+      }
     }
-  };
-  reader.readAsText(file);
+    feedbackDiv.innerHTML = html;
+    waitingForNext = false;
+  }
+}
+
+function nextSentence() {
+  idx = (idx+1) % sentences.length;
+  showSentence();
+  waitingForNext = false;
+}
+
+function showHint() {
+  let data = sentences[idx];
+  document.getElementById("feedback").innerHTML =
+    `Hint: starts with <b>${data.answer[0]}</b>`;
+}
+
+function toggleChoices() {
+  showChoices = !showChoices;
+  showSentence();
 }
 
 window.onload = async () => {
   await loadSentences();
-  let progress = getProgress();
-  showStats(progress);
-  showSentence(progress);
+  showSentence();
+
+  let input = document.getElementById("answer");
+  input.addEventListener("keydown", function(e) {
+    if (e.key === "Enter") {
+      if (waitingForNext) {
+        nextSentence();
+      } else {
+        checkAnswer();
+      }
+    }
+  });
 };
