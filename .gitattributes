@@ -1,0 +1,4 @@
+sentences.json filter=lfs diff=lfs merge=lfs -text
+spa_sentences.tsv filter=lfs diff=lfs merge=lfs -text
+spa_sentences_detailed.tsv filter=lfs diff=lfs merge=lfs -text
+links.csv filter=lfs diff=lfs merge=lfs -text
