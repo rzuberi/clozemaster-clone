@@ -16,13 +16,17 @@
     <div class="header-controls">
       <div class="header-stats" aria-label="Streak">
         <div class="streak">
-          <span>🔥</span>
+          <span aria-hidden="true">🔥</span>
           <strong id="streakCurrent">0</strong>
           <span class="sep">/ best</span>
           <strong id="streakBest">0</strong>
         </div>
       </div>
-      <button id="helpBtn" class="icon-btn" aria-haspopup="dialog" aria-controls="shortcutsModal" title="Shortcuts (?)">?</button>
+      <div class="header-actions" role="group" aria-label="Quick actions">
+        <button id="themeToggle" class="icon-btn" type="button" aria-label="Cycle theme" title="Cycle theme">🌓</button>
+        <button id="settingsBtn" class="icon-btn" type="button" aria-haspopup="dialog" aria-controls="settingsModal" title="Settings">⚙️</button>
+        <button id="helpBtn" class="icon-btn" type="button" aria-haspopup="dialog" aria-controls="shortcutsModal" title="Shortcuts (?)">?</button>
+      </div>
     </div>
   </header>
 
@@ -73,8 +77,69 @@
         <span class="label">Session</span>
         <span class="value"><strong id="sessionCorrect">0</strong> / <span id="dailyGoalText">20</span></span>
       </div>
-      <div id="sessionBar" class="session-bar" aria-hidden="true">
+      <div id="sessionBar" class="session-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-label="Daily goal progress">
         <div id="sessionFill" class="session-fill"></div>
+      </div>
+    </section>
+
+    <section class="progress-dashboard" aria-label="Progress overview">
+      <div class="dashboard-head">
+        <h2>Progress overview</h2>
+        <div class="dashboard-actions">
+          <button id="exportBtn" class="ghost-btn" type="button">Export data</button>
+          <button id="importBtn" class="ghost-btn" type="button">Import data</button>
+          <input id="importFile" type="file" accept="application/json" hidden />
+        </div>
+      </div>
+      <div class="metric-grid" role="list">
+        <article class="metric" role="listitem">
+          <div class="metric-value" id="statTotalReviews">0</div>
+          <div class="metric-label">Total reviews</div>
+          <div class="metric-sub" id="statAccuracy">Accuracy — 0%</div>
+        </article>
+        <article class="metric" role="listitem">
+          <div class="metric-value" id="statSessionAccuracy">0%</div>
+          <div class="metric-label">Session accuracy</div>
+          <div class="metric-sub" id="statSessionTotals">0 answered today</div>
+        </article>
+        <article class="metric" role="listitem">
+          <div class="metric-value" id="statActiveDays">0</div>
+          <div class="metric-label">Active days</div>
+          <div class="metric-sub" id="statAvgDaily">Average — 0 / day</div>
+        </article>
+        <article class="metric" role="listitem">
+          <div class="metric-value" id="statCurrentStreak">0</div>
+          <div class="metric-label">Day streak</div>
+          <div class="metric-sub" id="statBestStreak">Best — 0 days</div>
+        </article>
+        <article class="metric" role="listitem">
+          <div class="metric-value" id="statItemsLearned">0</div>
+          <div class="metric-label">Items started</div>
+          <div class="metric-sub" id="statItemsMastered">Mastered — 0</div>
+        </article>
+        <article class="metric" role="listitem">
+          <div class="metric-value" id="statDueNow">0</div>
+          <div class="metric-label">Due now</div>
+          <div class="metric-sub" id="statDueSoon">Next 3 days — 0</div>
+        </article>
+      </div>
+      <div class="progress-breakdown">
+        <div class="breakdown-head">
+          <span class="breakdown-title">Mastery breakdown</span>
+          <span class="breakdown-avg" id="statAvgInterval">Avg interval — 0 d</span>
+        </div>
+        <div id="breakdownBar" class="breakdown-bar" role="img" aria-label="Mastery breakdown">
+          <span id="breakdownNew" class="breakdown-segment breakdown-segment--new" style="width: 0%"></span>
+          <span id="breakdownLearning" class="breakdown-segment breakdown-segment--learning" style="width: 0%"></span>
+          <span id="breakdownReview" class="breakdown-segment breakdown-segment--review" style="width: 0%"></span>
+          <span id="breakdownMastered" class="breakdown-segment breakdown-segment--mastered" style="width: 0%"></span>
+        </div>
+        <ul class="breakdown-legend">
+          <li><span class="dot dot--new" aria-hidden="true"></span>New <strong id="statNewCount">0</strong></li>
+          <li><span class="dot dot--learning" aria-hidden="true"></span>Learning <strong id="statLearningCount">0</strong></li>
+          <li><span class="dot dot--review" aria-hidden="true"></span>Review <strong id="statReviewCount">0</strong></li>
+          <li><span class="dot dot--mastered" aria-hidden="true"></span>Mastered <strong id="statMasteredCount">0</strong></li>
+        </ul>
       </div>
     </section>
 
