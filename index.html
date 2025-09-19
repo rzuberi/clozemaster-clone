@@ -1,235 +1,174 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <title>Spanish Cloze Trainer</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <link rel="stylesheet" href="styles.css" />
-</head>
-<body>
-  <header class="app-header" role="banner">
-    <div class="brand">
-      <span class="logo" aria-hidden="true">🟩</span>
-      <h1>Spanish Trainer</h1>
-      <span class="version" id="appVersion" aria-label="App version"></span>
-    </div>
-    <div class="header-controls">
-      <div class="header-stats" aria-label="Streak">
-        <div class="streak">
-          <span aria-hidden="true">🔥</span>
-          <strong id="streakCurrent">0</strong>
-          <span class="sep">/ best</span>
-          <strong id="streakBest">0</strong>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>ClozeMaster · Español offline</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="top-bar">
+      <div class="branding">
+        <h1>ClozeMaster Clone</h1>
+        <span class="tag">Aprende español con práctica adaptativa</span>
+      </div>
+      <div class="top-bar__actions">
+        <button id="resumeButton" class="ghost">Continuar</button>
+        <button id="themeToggle" class="ghost">🌓 auto</button>
+      </div>
+    </header>
+
+    <main class="layout">
+      <section class="panel hero">
+        <div class="hero__stats">
+          <div class="stat-card">
+            <span class="stat-card__label">Oraciones resueltas</span>
+            <span id="overviewAnswered" class="stat-card__value">0</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-card__label">Precisión global</span>
+            <span id="overviewAccuracy" class="stat-card__value">0%</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-card__label">Nivel estimado</span>
+            <span id="overviewLevel" class="stat-card__value">A1</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-card__label">Meta diaria</span>
+            <span id="overviewGoal" class="stat-card__value">20</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-card__label">Racha</span>
+            <span id="overviewStreak" class="stat-card__value">0</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-card__label">Última evaluación</span>
+            <span id="overviewLastAssessment" class="stat-card__value">—</span>
+          </div>
         </div>
-      </div>
-      <div class="header-actions" role="group" aria-label="Quick actions">
-        <button id="themeToggle" class="icon-btn" type="button" aria-label="Cycle theme" title="Cycle theme">🌓</button>
-        <button id="settingsBtn" class="icon-btn" type="button" aria-haspopup="dialog" aria-controls="settingsModal" title="Settings">⚙️</button>
-        <button id="helpBtn" class="icon-btn" type="button" aria-haspopup="dialog" aria-controls="shortcutsModal" title="Shortcuts (?)">?</button>
-      </div>
-    </div>
-  </header>
-
-  <main class="card" id="card" role="main">
-    <p id="sentence" class="sentence" aria-live="polite"></p>
-
-    <div id="modeToggleRow" class="mode-row" role="group" aria-label="Answer mode">
-      <button id="modeInputBtn" class="chip chip--on" type="button" aria-pressed="true">Type</button>
-      <button id="modeMcBtn" class="chip" type="button" aria-pressed="false">Multiple Choice</button>
-    </div>
-
-    <label for="answer" class="visually-hidden">Type your answer</label>
-    <input id="answer" class="answer-input" type="text" placeholder="Type your answer… (Enter to submit)" autocomplete="off" />
-
-    <div id="choices" class="choices" hidden></div>
-
-    <div id="feedback" class="feedback" aria-live="polite"></div>
-
-    <div class="actions">
-      <button id="hintBtn" class="btn" type="button" title="Hint (H)">💡 Hint</button>
-      <button id="submitBtn" class="btn primary" type="button" title="Submit (Enter)">Submit</button>
-      <button id="skipBtn" class="btn" type="button" title="Skip (Shift+Enter)">Skip</button>
-      <button id="repeatBtn" class="btn" type="button" title="Repeat (R)">Repeat</button>
-      <button id="nextBtn" class="btn" type="button" title="Next (G or N)">Next</button>
-    </div>
-  </main>
-
-  <footer class="footer" role="contentinfo">
-    <section class="goal-ring" aria-label="Daily Goal Progress">
-      <div class="ring-wrap">
-        <svg id="goalRing" class="ring" width="96" height="96" viewBox="0 0 100 100" role="img" aria-label="Daily goal">
-          <circle class="ring-bg" cx="50" cy="50" r="45" />
-          <circle class="ring-fg" id="ringFg" cx="50" cy="50" r="45" />
-        </svg>
-        <div class="ring-center">
-          <div id="ringText" class="ring-text">0/20</div>
-          <div class="ring-sub">today</div>
+        <div class="hero__actions">
+          <button id="startPractice" class="primary">Iniciar práctica</button>
+          <button id="startQuick" class="secondary">Práctica rápida</button>
+          <button id="startAssessment" class="ghost">Evaluación diagnóstica</button>
         </div>
-      </div>
-      <div class="today-stats">
-        <div><strong id="todayCorrect">0</strong> correct</div>
-        <div><span id="todayWrong">0</span> wrong</div>
-      </div>
-    </section>
+      </section>
 
-    <section class="session" aria-label="Session progress">
-      <div class="session-row">
-        <span class="label">Session</span>
-        <span class="value"><strong id="sessionCorrect">0</strong> / <span id="dailyGoalText">20</span></span>
-      </div>
-      <div id="sessionBar" class="session-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-label="Daily goal progress">
-        <div id="sessionFill" class="session-fill"></div>
-      </div>
-    </section>
-
-    <section class="progress-dashboard" aria-label="Progress overview">
-      <div class="dashboard-head">
-        <h2>Progress overview</h2>
-        <div class="dashboard-actions">
-          <button id="exportBtn" class="ghost-btn" type="button">Export data</button>
-          <button id="importBtn" class="ghost-btn" type="button">Import data</button>
-          <input id="importFile" type="file" accept="application/json" hidden />
+      <section class="panel practice">
+        <header class="practice__header">
+          <div class="session-label">
+            <span id="sessionTypeLabel">Modo libre</span>
+            <span id="sessionStats" class="session-value">0/0</span>
+            <span id="sessionAccuracy" class="session-value">0%</span>
+          </div>
+          <div class="practice-modes">
+            <button class="chip" data-mode="typing">✍️ Escribir</button>
+            <button class="chip" data-mode="multiple">✅ Opciones</button>
+            <button class="chip" data-mode="listening">🔊 Escuchar</button>
+          </div>
+        </header>
+        <div id="assessmentStatus" class="assessment-status"></div>
+        <div id="card" class="card">
+          <div class="card__sentence" id="sentenceText">Inicia una práctica para comenzar</div>
+          <div id="translationHint" class="card__hint" hidden></div>
+          <form id="answerForm" class="answer-form" autocomplete="off">
+            <input type="text" id="answerInput" placeholder="Escribe la palabra faltante" autocomplete="off" />
+            <div class="answer-actions">
+              <button type="submit" id="submitAnswer" class="primary">Responder</button>
+              <button type="button" id="skipButton" class="ghost">Saltar</button>
+              <button type="button" id="hintButton" class="ghost">Pista</button>
+              <button type="button" id="audioButton" class="ghost">🔊</button>
+            </div>
+          </form>
+          <div id="choiceButtons" class="choices" hidden></div>
+          <div id="feedback" class="feedback"></div>
         </div>
-      </div>
-      <div class="metric-grid" role="list">
-        <article class="metric" role="listitem">
-          <div class="metric-value" id="statTotalReviews">0</div>
-          <div class="metric-label">Total reviews</div>
-          <div class="metric-sub" id="statAccuracy">Accuracy — 0%</div>
-        </article>
-        <article class="metric" role="listitem">
-          <div class="metric-value" id="statSessionAccuracy">0%</div>
-          <div class="metric-label">Session accuracy</div>
-          <div class="metric-sub" id="statSessionTotals">0 answered today</div>
-        </article>
-        <article class="metric" role="listitem">
-          <div class="metric-value" id="statActiveDays">0</div>
-          <div class="metric-label">Active days</div>
-          <div class="metric-sub" id="statAvgDaily">Average — 0 / day</div>
-        </article>
-        <article class="metric" role="listitem">
-          <div class="metric-value" id="statCurrentStreak">0</div>
-          <div class="metric-label">Day streak</div>
-          <div class="metric-sub" id="statBestStreak">Best — 0 days</div>
-        </article>
-        <article class="metric" role="listitem">
-          <div class="metric-value" id="statItemsLearned">0</div>
-          <div class="metric-label">Items started</div>
-          <div class="metric-sub" id="statItemsMastered">Mastered — 0</div>
-        </article>
-        <article class="metric" role="listitem">
-          <div class="metric-value" id="statDueNow">0</div>
-          <div class="metric-label">Due now</div>
-          <div class="metric-sub" id="statDueSoon">Next 3 days — 0</div>
-        </article>
-      </div>
-      <div class="progress-breakdown">
-        <div class="breakdown-head">
-          <span class="breakdown-title">Mastery breakdown</span>
-          <span class="breakdown-avg" id="statAvgInterval">Avg interval — 0 d</span>
+        <div class="practice__footer">
+          <button id="endSessionButton" class="ghost">Terminar sesión</button>
         </div>
-        <div id="breakdownBar" class="breakdown-bar" role="img" aria-label="Mastery breakdown">
-          <span id="breakdownNew" class="breakdown-segment breakdown-segment--new" style="width: 0%"></span>
-          <span id="breakdownLearning" class="breakdown-segment breakdown-segment--learning" style="width: 0%"></span>
-          <span id="breakdownReview" class="breakdown-segment breakdown-segment--review" style="width: 0%"></span>
-          <span id="breakdownMastered" class="breakdown-segment breakdown-segment--mastered" style="width: 0%"></span>
+      </section>
+
+      <section class="panel analytics">
+        <h2>Analítica y progreso</h2>
+        <div class="analytics-grid">
+          <div class="analytics-card">
+            <h3>Actividad reciente</h3>
+            <p>Hoy <span id="heatmapToday">0</span> · 7d <span id="heatmap7">0</span> · 30d <span id="heatmap30">0</span></p>
+            <div id="heatmapGrid" class="heatmap" role="grid"></div>
+          </div>
+          <div class="analytics-card">
+            <h3>Exactitud por gramática</h3>
+            <div id="grammarStats" class="stat-list"></div>
+          </div>
+          <div class="analytics-card">
+            <h3>Exactitud por vocabulario</h3>
+            <div id="vocabularyStats" class="stat-list"></div>
+          </div>
+          <div class="analytics-card">
+            <h3>Niveles de dificultad</h3>
+            <div id="difficultyStats" class="stat-list"></div>
+          </div>
+          <div class="analytics-card">
+            <h3>Radar de competencias</h3>
+            <canvas id="spiderChart" width="320" height="320"></canvas>
+          </div>
+          <div class="analytics-card">
+            <h3>Recomendaciones</h3>
+            <div id="recommendations" class="recommendations"></div>
+            <p>Velocidad semanal: <span id="velocityWeekly">0</span> · Mejor racha: <span id="velocityStreak">0</span></p>
+            <p>Revisiones: hoy <span id="dueNow">0</span> · próximos 3 días <span id="dueSoon">0</span> · total <span id="dueTotal">0</span></p>
+          </div>
         </div>
-        <ul class="breakdown-legend">
-          <li><span class="dot dot--new" aria-hidden="true"></span>New <strong id="statNewCount">0</strong></li>
-          <li><span class="dot dot--learning" aria-hidden="true"></span>Learning <strong id="statLearningCount">0</strong></li>
-          <li><span class="dot dot--review" aria-hidden="true"></span>Review <strong id="statReviewCount">0</strong></li>
-          <li><span class="dot dot--mastered" aria-hidden="true"></span>Mastered <strong id="statMasteredCount">0</strong></li>
-        </ul>
-      </div>
-    </section>
+      </section>
 
-    <section class="heatmap" aria-label="Last 90 days">
-      <div class="heatmap-head">
-        <div class="hm-title">Last 90 days</div>
-        <div class="hm-stats">
-          <span>Today: <strong id="hmToday">0</strong></span>
-          <span>7-day: <strong id="hm7d">0</strong></span>
-          <span>30-day: <strong id="hm30d">0</strong></span>
+      <section class="panel plan">
+        <h2>Personaliza tu práctica</h2>
+        <div class="plan-grid">
+          <label>
+            Gramática
+            <select id="planGrammar" multiple></select>
+          </label>
+          <label>
+            Vocabulario
+            <select id="planVocabulary" multiple></select>
+          </label>
+          <label>
+            Dificultad
+            <select id="planDifficulty" multiple></select>
+          </label>
+          <label>
+            Meta diaria
+            <input type="number" id="dailyGoalInput" min="1" value="20" />
+          </label>
+          <label>
+            Práctica rápida (ítems)
+            <input type="number" id="quickLengthInput" min="3" value="10" />
+          </label>
+          <label class="switch">
+            <input type="checkbox" id="audioToggle" />
+            <span>Activar audio (TTS)</span>
+          </label>
         </div>
-      </div>
-      <div id="heatGrid" class="heat-grid" role="grid" aria-readonly="true" aria-label="Daily correct answers heatmap"></div>
-    </section>
-  </footer>
+        <div class="plan-actions">
+          <button id="planSave" class="primary">Guardar plan</button>
+          <button id="planReset" class="ghost">Restablecer</button>
+        </div>
+        <p id="planSummary" class="plan-summary">Sin preferencias seleccionadas</p>
+      </section>
 
-  <div id="shortcutsModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="shortcutsTitle" hidden>
-    <div class="modal-content">
-      <div class="modal-head">
-        <h2 id="shortcutsTitle">Keyboard Shortcuts</h2>
-        <button id="closeShortcuts" class="icon-btn" aria-label="Close">✕</button>
-      </div>
-      <div class="modal-body">
-        <ul class="shortcut-list">
-          <li><kbd>Enter</kbd> — Submit / Next if already correct</li>
-          <li><kbd>Shift</kbd> + <kbd>Enter</kbd> — Skip</li>
-          <li><kbd>R</kbd> — Repeat this item</li>
-          <li><kbd>G</kbd> or <kbd>N</kbd> — Next item</li>
-          <li><kbd>M</kbd> — Toggle Type / Multiple Choice</li>
-          <li><kbd>H</kbd> — Hint</li>
-          <li><kbd>1</kbd>–<kbd>4</kbd> — Choose MC option</li>
-          <li><kbd>↑</kbd>/<kbd>↓</kbd> — Cycle MC focus</li>
-          <li><kbd>/</kbd> — Focus answer box</li>
-        </ul>
-        <p class="muted">Tip: Works fully offline. Data is stored locally.</p>
-      </div>
-      <div class="modal-foot">
-        <button id="okShortcuts" class="btn primary">OK</button>
-      </div>
-    </div>
-  </div>
+      <section class="panel gamification">
+        <h2>Logros y motivación</h2>
+        <div id="badgesList" class="badges"></div>
+      </section>
+    </main>
 
-  <!-- Settings modal -->
-  <div id="settingsModal" class="modal" hidden>
-    <div class="modal-content">
-      <div class="modal-head">
-        <h2>Settings</h2>
-        <button id="closeSettings" class="icon-btn">✕</button>
-      </div>
-      <div class="modal-body">
-        <label>Daily Goal:
-          <input id="goalInput" type="number" min="1" max="200" />
-        </label>
-        <label>Theme:
-          <select id="themeSelect">
-            <option value="auto">Auto</option>
-            <option value="light">Light</option>
-            <option value="dark">Dark</option>
-          </select>
-        </label>
-        <label><input id="ttsToggle" type="checkbox" /> Enable TTS</label>
-        <button id="resetBtn" class="btn danger">Reset Progress</button>
-      </div>
-      <div class="modal-foot">
-        <button id="saveSettings" class="btn primary">Save</button>
-      </div>
-    </div>
-  </div>
+    <div id="toasts" class="toast-container" aria-live="polite"></div>
 
-  <!-- Import preview modal -->
-  <div id="importModal" class="modal" hidden>
-    <div class="modal-content">
-      <div class="modal-head">
-        <h2>Import Progress</h2>
-        <button id="closeImport" class="icon-btn">✕</button>
-      </div>
-      <div class="modal-body">
-        <div id="importPreview"></div>
-        <label><input type="radio" name="importMode" value="merge" checked /> Merge</label>
-        <label><input type="radio" name="importMode" value="replace" /> Replace</label>
-      </div>
-      <div class="modal-foot">
-        <button id="applyImport" class="btn primary">Apply</button>
-      </div>
-    </div>
-  </div>
+    <dialog id="assessmentDialog" class="assessment-dialog">
+      <h2>Informe de evaluación</h2>
+      <div id="assessmentSummary"></div>
+      <button id="assessmentClose" class="primary">Cerrar</button>
+    </dialog>
 
-  <!-- Toasts -->
-  <div id="toasts" class="toasts"></div>
-
-  <script src="app.js"></script>
-</body>
+    <script type="module" src="./app.js"></script>
+  </body>
 </html>
